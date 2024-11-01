@@ -1,17 +1,17 @@
 import sys
-from PyQt5.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QFileDialog, QVBoxLayout, QHBoxLayout, QPushButton, QSpinBox, QLineEdit, QGroupBox, QGridLayout
 )
 from utils.file_utils import load_images_from_folder
+from modules.calibration import Calibration
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("MainWindow - PyQt5 UI Example with Custom Button Sizes")
+        self.setWindowTitle("MainWindow - PySide6 UI Example with Custom Button Sizes")
         self.setGeometry(100, 100, 800, 600)
-
-        # Main layout
+        self.calibration = Calibration(height=11, width=8)        
         main_layout = QHBoxLayout()
 
         # Load Image Section
@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
 
         find_corners_button = QPushButton("1.1 Find corners")
         find_corners_button.setFixedSize(150, 40)
+        find_corners_button.clicked.connect(self.find_corners)
         calibration_layout.addWidget(find_corners_button, 0, 0)
 
         find_intrinsic_button = QPushButton("1.2 Find intrinsic")
@@ -120,7 +121,6 @@ class MainWindow(QMainWindow):
     def load_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder:
-            # Load images in a structured dictionary
             structured_images = load_images_from_folder(folder)
             if structured_images:
                 print("Loaded images by folder structure:")
@@ -128,14 +128,19 @@ class MainWindow(QMainWindow):
                     print(f"{subfolder}: {len(images)} images")
                     for image in images:
                         print(f" - {image}")
-                # You can store `structured_images` in an attribute for further processing
                 self.structured_images = structured_images
             else:
                 print("No images found in the selected folder.")
 
+    def find_corners(self):
+        if hasattr(self, 'structured_images'):
+            # Call find_and_draw_corners function
+            self.calibration.find_and_draw_corners(self.structured_images)
+        else:
+            print("No images loaded. Please load a folder first.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
