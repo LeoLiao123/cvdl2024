@@ -44,14 +44,17 @@ class MainWindow(QMainWindow):
 
         find_intrinsic_button = QPushButton("1.2 Find intrinsic")
         find_intrinsic_button.setFixedSize(150, 40)
+        find_intrinsic_button.clicked.connect(self.find_instrinsics)
         calibration_layout.addWidget(find_intrinsic_button, 1, 0)
 
         find_extrinsic_button = QPushButton("1.3 Find extrinsic")
         find_extrinsic_button.setFixedSize(150, 40)
+        find_extrinsic_button.clicked.connect(self.find_extrinsic)
         calibration_layout.addWidget(find_extrinsic_button, 2, 0)
 
-        spin_box = QSpinBox()
-        calibration_layout.addWidget(spin_box, 2, 1)
+        self.spin_box = QSpinBox()
+        self.spin_box.setRange(1, 15)
+        calibration_layout.addWidget(self.spin_box, 2, 1)
 
         find_distortion_button = QPushButton("1.4 Find distortion")
         find_distortion_button.setFixedSize(150, 40)
@@ -135,9 +138,16 @@ class MainWindow(QMainWindow):
     def find_corners(self):
         if hasattr(self, 'structured_images'):
             # Call find_and_draw_corners function
-            self.calibration.find_and_draw_corners(self.structured_images)
+            self.calibration.find_and_draw_corners(self.structured_images["Q1_Image"])
         else:
             print("No images loaded. Please load a folder first.")
+
+    def find_instrinsics(self):
+        self.calibration.find_intrinsics()
+
+    def find_extrinsic(self):
+        self.calibration.find_extrinsic(self.spin_box.value())
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
