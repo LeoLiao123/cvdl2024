@@ -2,6 +2,8 @@ import sys
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QFileDialog, QVBoxLayout, QHBoxLayout, QPushButton, QSpinBox, QLineEdit, QGroupBox, QGridLayout
 )
+from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtCore import QRegularExpression
 from utils.file_utils import load_images_from_folder
 from modules.calibration import Calibration
 
@@ -10,7 +12,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("MainWindow - PySide6 UI Example with Custom Button Sizes")
         self.setGeometry(100, 100, 800, 600)
-        self.calibration = Calibration(height=11, width=8)        
+        self.calibration = Calibration(height=11, width=8)  
+        self.structured_images = None
+        self.left_img = None
+        self.right_img = None      
         main_layout = QHBoxLayout()
 
         main_layout.addWidget(self.create_load_image_group())
@@ -34,8 +39,8 @@ class MainWindow(QMainWindow):
         group = QGroupBox("Load Image")
         layout = QVBoxLayout()
         layout.addWidget(self.create_button("Load folder", (100, 80), self.load_folder))
-        layout.addWidget(self.create_button("Load Image_L", (100, 80)))
-        layout.addWidget(self.create_button("Load Image_R", (100, 80)))
+        layout.addWidget(self.create_button("Load Image_L", (100, 80), lambda : self.load_image("Left")))
+        layout.addWidget(self.create_button("Load Image_R", (100, 80), lambda : self.load_image("Right")))
         group.setLayout(layout)
         return group
 
@@ -59,7 +64,12 @@ class MainWindow(QMainWindow):
     def create_ar_group(self):
         group = QGroupBox("2. Augmented Reality")
         layout = QGridLayout()
-        layout.addWidget(QLineEdit(), 0, 0, 1, 2)
+        line_edit = QLineEdit()
+        # Set the validator
+        regex = QRegularExpression("^[a-zA-Z]{0,6}$")  # Only allows 0 to 6 English letters
+        validator = QRegularExpressionValidator(regex)
+        line_edit.setValidator(validator)
+        layout.addWidget(line_edit, 0, 0, 1, 2)
         layout.addWidget(self.create_button("2.1 Show words on board", (180, 40)), 1, 0)
         layout.addWidget(self.create_button("2.2 Show words vertical", (180, 40)), 1, 1)
         group.setLayout(layout)
@@ -94,6 +104,17 @@ class MainWindow(QMainWindow):
             else:
                 print("No images found in the selected folder.")
 
+    def load_image(self, side):
+        image = QFileDialog.getOpenFileName(self, "Select Image")
+        if image:
+            print(f"{side} side image : {image[0]}")
+            if side == "Left":
+                self.left_img = image[0]
+            else:
+                self.right_img = image[0]
+        else:
+            print("No images found in the selected folder.")
+
     def find_corners(self):
         if hasattr(self, 'structured_images'):
             self.calibration.find_and_draw_corners(self.structured_images["Q1_Image"])
@@ -111,7 +132,7 @@ class MainWindow(QMainWindow):
         self.calibration.find_distortion()
     
     def show_undistorted_result(self):
-        self.calibration.show_undistorted_result(self.structured_images["Q1_Image"])
+        self.calibration.show_undistorted_result(self.structured_images["Q1_Image"])        
 
 
 if __name__ == "__main__":
