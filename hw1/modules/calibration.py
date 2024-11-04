@@ -12,7 +12,7 @@ class Calibration:
         self.rvecs = None
         self.tvecs = None 
 
-    def find_and_draw_corners(self, images):
+    def find_and_draw_corners(self, images, display=True):
         """
         Finds and draws chessboard corners on each image.
         

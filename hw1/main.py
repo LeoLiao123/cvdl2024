@@ -6,6 +6,7 @@ from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtCore import QRegularExpression
 from utils.file_utils import load_images_from_folder
 from modules.calibration import Calibration
+from modules.aug_reality import AugmentedRealityProcessor
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -70,8 +71,8 @@ class MainWindow(QMainWindow):
         validator = QRegularExpressionValidator(regex)
         line_edit.setValidator(validator)
         layout.addWidget(line_edit, 0, 0, 1, 2)
-        layout.addWidget(self.create_button("2.1 Show words on board", (180, 40)), 1, 0)
-        layout.addWidget(self.create_button("2.2 Show words vertical", (180, 40)), 1, 1)
+        layout.addWidget(self.create_button("2.1 Show words on board", (180, 40), self.show_words_on_board), 1, 0)
+        layout.addWidget(self.create_button("2.2 Show words vertical", (180, 40), self.show_words_vertical), 1, 1)
         group.setLayout(layout)
         return group
 
@@ -132,7 +133,13 @@ class MainWindow(QMainWindow):
         self.calibration.find_distortion()
     
     def show_undistorted_result(self):
-        self.calibration.show_undistorted_result(self.structured_images["Q1_Image"])        
+        self.calibration.show_undistorted_result(self.structured_images["Q1_Image"])
+
+    def show_words_on_board(self):
+        
+
+    def show_words_vertical(self):
+        pass        
 
 
 if __name__ == "__main__":
