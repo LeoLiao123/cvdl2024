@@ -7,6 +7,7 @@ from PySide6.QtCore import QRegularExpression
 from utils.file_utils import load_images_from_folder
 from modules.calibration import Calibration
 from modules.aug_reality import AugmentedRealityProcessor
+from modules.stereo_disparity import StereoDisparityProcessor  
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -15,6 +16,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
         self.calibration = Calibration(height=11, width=8)
         self.aug_reality = AugmentedRealityProcessor()  
+        self.stereo_processor = StereoDisparityProcessor()  
         self.structured_images = None
         self.left_img = None
         self.right_img = None      
@@ -55,7 +57,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.create_button("1.4 Find distortion", (150, 40), self.find_distortion), 3, 0)
         layout.addWidget(self.create_button("1.5 Show result", (150, 40),self.show_undistorted_result), 4, 0)
         
-        # Set self.spin_box as an attribute
         self.spin_box = QSpinBox()
         self.spin_box.setRange(1, 15)
         layout.addWidget(self.spin_box, 2, 1)
@@ -67,7 +68,6 @@ class MainWindow(QMainWindow):
         group = QGroupBox("2. Augmented Reality")
         layout = QGridLayout()
         self.line_edit = QLineEdit()
-        # Set the validator
         regex = QRegularExpression("^[a-zA-Z]{0,6}$")  # Only allows 0 to 6 English letters
         validator = QRegularExpressionValidator(regex)
         self.line_edit.setValidator(validator)
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
     def create_stereo_group(self):
         group = QGroupBox("3. Stereo disparity map")
         layout = QVBoxLayout()
-        layout.addWidget(self.create_button("3.1 Stereo disparity map", (200, 50)))
+        layout.addWidget(self.create_button("3.1 Stereo disparity map", (200, 50), self.compute_stereo_disparity))
         group.setLayout(layout)
         return group
 
@@ -108,18 +108,20 @@ class MainWindow(QMainWindow):
                 print("No images found in the selected folder.")
 
     def load_image(self, side):
-        image = QFileDialog.getOpenFileName(self, "Select Image")
+        image = QFileDialog.getOpenFileName(self, "Select Image")[0]
         if image:
-            print(f"{side} side image : {image[0]}")
+            print(f"{side} side image : {image}")
             if side == "Left":
-                self.left_img = image[0]
+                self.left_img = image
+                self.stereo_processor.load_image_left(image)
             else:
-                self.right_img = image[0]
+                self.right_img = image
+                self.stereo_processor.load_image_right(image)
         else:
-            print("No images found in the selected folder.")
+            print(f"No image selected for {side} side.")
 
     def find_corners(self):
-        if hasattr(self, 'structured_images'):
+        if self.structured_images:
             self.calibration.find_and_draw_corners(self.structured_images["Q1_Image"])
         else:
             print("No images loaded. Please load a folder first.")
@@ -128,7 +130,7 @@ class MainWindow(QMainWindow):
         self.calibration.find_intrinsics()
 
     def find_extrinsic(self):
-        image_num = self.spin_box.value()  # Get the current value of the spin box
+        image_num = self.spin_box.value()
         self.calibration.find_extrinsic(image_num)
 
     def find_distortion(self):
@@ -138,17 +140,22 @@ class MainWindow(QMainWindow):
         self.calibration.show_undistorted_result(self.structured_images["Q1_Image"])
 
     def show_words_on_board(self):
-        if hasattr(self, 'structured_images'):
+        if self.structured_images:
             self.aug_reality.project_word_on_board(self.structured_images["Q1_Image"], self.line_edit.text(), "horizontal")
         else:
             print("No images loaded. Please load a folder first.")
 
     def show_words_vertical(self):
-        if hasattr(self, 'structured_images'):
+        if self.structured_images:
             self.aug_reality.project_word_on_board(self.structured_images["Q1_Image"], self.line_edit.text(), "vertical")
         else:
             print("No images loaded. Please load a folder first.")        
 
+    def compute_stereo_disparity(self):
+        if self.left_img and self.right_img:
+            self.stereo_processor.compute_disparity()
+        else:
+            print("Please load both left and right images first.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
