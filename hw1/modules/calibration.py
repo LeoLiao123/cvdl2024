@@ -12,12 +12,14 @@ class Calibration:
         self.rvecs = None
         self.tvecs = None 
 
-    def find_and_draw_corners(self, images, display=True):
+    def find_and_draw_corners(self, images, display = True):
         """
         Finds and draws chessboard corners on each image.
         
         Args:
             images (list): List of image paths.
+            display (bool): Display images with corners.
+            limit (int): Maximum number of images to process.
         """
         # Reset points
         self.image_points = []
@@ -47,16 +49,17 @@ class Calibration:
                 corners = cv2.cornerSubPix(grayimg, corners, winSize, zeroZone, criteria)
                 self.image_points.append(corners)
                 self.obj_points.append(objp)
-
-                # Draw corners on the image
-                cv2.drawChessboardCorners(image, self.chessboard_size, corners, ret)
-                cv2.imshow(f"Corners in {os.path.basename(img_path)}", image)
-                cv2.waitKey(5000)  
+                if display:
+                    # Draw corners on the image
+                    cv2.drawChessboardCorners(image, self.chessboard_size, corners, ret)
+                    cv2.imshow(f"Corners in {os.path.basename(img_path)}", image)
+                    cv2.waitKey(5000)  
 
             else:
                 print(f"Chessboard corners not found in {img_path}")
 
-        cv2.destroyAllWindows()
+        if display:
+            cv2.destroyAllWindows()
     
     def find_intrinsics(self):
         """
@@ -124,7 +127,9 @@ class Calibration:
 
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             undistorted_image = cv2.undistort(gray_image, self.ins, self.dist)
-            
+            # Save two images side by side
+            cv2.imwrite(f"distorted{os.path.basename(image_path)}", gray_image)
+            cv2.imwrite(f"undistorted{os.path.basename(image_path)}", undistorted_image)
             cv2.imshow("Distorted image", gray_image)
             cv2.imshow("Undistorted image", undistorted_image)
             cv2.waitKey(5000)

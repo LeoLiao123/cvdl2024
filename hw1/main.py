@@ -13,7 +13,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("MainWindow - PySide6 UI Example with Custom Button Sizes")
         self.setGeometry(100, 100, 800, 600)
-        self.calibration = Calibration(height=11, width=8)  
+        self.calibration = Calibration(height=11, width=8)
+        self.aug_reality = AugmentedRealityProcessor()  
         self.structured_images = None
         self.left_img = None
         self.right_img = None      
@@ -65,12 +66,12 @@ class MainWindow(QMainWindow):
     def create_ar_group(self):
         group = QGroupBox("2. Augmented Reality")
         layout = QGridLayout()
-        line_edit = QLineEdit()
+        self.line_edit = QLineEdit()
         # Set the validator
         regex = QRegularExpression("^[a-zA-Z]{0,6}$")  # Only allows 0 to 6 English letters
         validator = QRegularExpressionValidator(regex)
-        line_edit.setValidator(validator)
-        layout.addWidget(line_edit, 0, 0, 1, 2)
+        self.line_edit.setValidator(validator)
+        layout.addWidget(self.line_edit, 0, 0, 1, 2)
         layout.addWidget(self.create_button("2.1 Show words on board", (180, 40), self.show_words_on_board), 1, 0)
         layout.addWidget(self.create_button("2.2 Show words vertical", (180, 40), self.show_words_vertical), 1, 1)
         group.setLayout(layout)
@@ -102,6 +103,7 @@ class MainWindow(QMainWindow):
                 print("Loaded images by folder structure:")
                 for subfolder, images in structured_images.items():
                     print(f"{subfolder}: {len(images)} images")
+                    print(images)
             else:
                 print("No images found in the selected folder.")
 
@@ -136,10 +138,16 @@ class MainWindow(QMainWindow):
         self.calibration.show_undistorted_result(self.structured_images["Q1_Image"])
 
     def show_words_on_board(self):
-        
+        if hasattr(self, 'structured_images'):
+            self.aug_reality.project_word_on_board(self.structured_images["Q1_Image"], self.line_edit.text(), "horizontal")
+        else:
+            print("No images loaded. Please load a folder first.")
 
     def show_words_vertical(self):
-        pass        
+        if hasattr(self, 'structured_images'):
+            self.aug_reality.project_word_on_board(self.structured_images["Q1_Image"], self.line_edit.text(), "vertical")
+        else:
+            print("No images loaded. Please load a folder first.")        
 
 
 if __name__ == "__main__":
