@@ -8,6 +8,7 @@ from utils.file_utils import load_images_from_folder
 from modules.calibration import Calibration
 from modules.aug_reality import AugmentedRealityProcessor
 from modules.stereo_disparity import StereoDisparityProcessor  
+from modules.sift_processor import SIFTProcessor
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -16,7 +17,8 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
         self.calibration = Calibration(height=11, width=8)
         self.aug_reality = AugmentedRealityProcessor()  
-        self.stereo_processor = StereoDisparityProcessor()  
+        self.stereo_processor = StereoDisparityProcessor() 
+        self.sift_processor = SIFTProcessor() 
         self.structured_images = None
         self.left_img = None
         self.right_img = None      
@@ -87,10 +89,10 @@ class MainWindow(QMainWindow):
     def create_sift_group(self):
         group = QGroupBox("4. SIFT")
         layout = QGridLayout()
-        layout.addWidget(self.create_button("Load Image1", (120, 40)), 0, 0)
-        layout.addWidget(self.create_button("Load Image2", (120, 40)), 1, 0)
-        layout.addWidget(self.create_button("4.1 Keypoints", (120, 40)), 2, 0)
-        layout.addWidget(self.create_button("4.2 Matched Keypoints", (120, 40)), 3, 0)
+        layout.addWidget(self.create_button("Load Image1", (120, 40), self.load_sift_image1), 0, 0)
+        layout.addWidget(self.create_button("Load Image2", (120, 40), self.load_sift_image2), 1, 0)
+        layout.addWidget(self.create_button("4.1 Keypoints", (120, 40), self.show_keypoints), 2, 0)
+        layout.addWidget(self.create_button("4.2 Matched Keypoints", (120, 40), self.show_matched_keypoints), 3, 0)
         group.setLayout(layout)
         return group
 
@@ -156,6 +158,22 @@ class MainWindow(QMainWindow):
             self.stereo_processor.compute_disparity()
         else:
             print("Please load both left and right images first.")
+
+    def load_sift_image1(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Load Image 1")
+        if filename:
+            self.sift_processor.load_image1(filename)
+
+    def load_sift_image2(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Load Image 2")
+        if filename:
+            self.sift_processor.load_image2(filename)
+
+    def show_keypoints(self):
+        self.sift_processor.show_keypoints()
+
+    def show_matched_keypoints(self):
+        self.sift_processor.show_matched_keypoints()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
