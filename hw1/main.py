@@ -143,13 +143,13 @@ class MainWindow(QMainWindow):
 
     def show_words_on_board(self):
         if self.structured_images:
-            self.aug_reality.project_word_on_board(self.structured_images["Q1_Image"], self.line_edit.text(), "horizontal")
+            self.aug_reality.project_word_on_board(self.structured_images["Q2_Image"], self.line_edit.text(), "horizontal")
         else:
             print("No images loaded. Please load a folder first.")
 
     def show_words_vertical(self):
         if self.structured_images:
-            self.aug_reality.project_word_on_board(self.structured_images["Q1_Image"], self.line_edit.text(), "vertical")
+            self.aug_reality.project_word_on_board(self.structured_images["Q2_Image"], self.line_edit.text(), "vertical")
         else:
             print("No images loaded. Please load a folder first.")        
 

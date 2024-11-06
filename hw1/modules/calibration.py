@@ -71,8 +71,7 @@ class Calibration:
 
         # Use the first image to determine size
         h, w = self.image_points[0][0].shape[0:2]
-        imageSize = (w, h)
-
+        imageSize = (2048, 2048)
         # Perform camera calibration
         ret, self.ins, self.dist, self.rvecs, self.tvecs = cv2.calibrateCamera(
             self.obj_points, self.image_points, imageSize, None, None

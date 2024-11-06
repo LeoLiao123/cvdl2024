@@ -23,10 +23,41 @@ class AugmentedRealityProcessor:
         if char_points is not None and char_points.shape[1] == 2:
             char_points = char_points.reshape(-1, 3)  # Flatten into (N*2, 3)
 
-        print(f"Character {char} points: {char_points}")
+        char_points = char_points * 0.02  # Scale points by square size
+
         return char_points
 
-    def project_word_on_board(self, images, word, orientation="horizontal"):
+    def rotate_points(self, points, angle_degrees, axis='z'):
+        """
+        Rotate points by a given angle around the specified axis.
+        """
+        angle_radians = np.deg2rad(angle_degrees)
+        if axis == 'z':
+            rotation_matrix = np.array([
+                [np.cos(angle_radians), -np.sin(angle_radians), 0],
+                [np.sin(angle_radians), np.cos(angle_radians), 0],
+                [0, 0, 1]
+            ])
+        elif axis == 'x':
+            rotation_matrix = np.array([
+                [1, 0, 0],
+                [0, np.cos(angle_radians), -np.sin(angle_radians)],
+                [0, np.sin(angle_radians), np.cos(angle_radians)]
+            ])
+        elif axis == 'y':
+            rotation_matrix = np.array([
+                [np.cos(angle_radians), 0, np.sin(angle_radians)],
+                [0, 1, 0],
+                [-np.sin(angle_radians), 0, np.cos(angle_radians)]
+            ])
+        else:
+            raise ValueError("Invalid axis, choose from 'x', 'y', or 'z'")
+
+        # Apply the rotation matrix to the points
+        rotated_points = np.dot(points, rotation_matrix.T)
+        return rotated_points
+
+    def project_word_on_board(self, images, word="OPENCV", orientation="horizontal"):
         """
         Project each character of the word onto the chessboard using calibrated parameters.
         """
@@ -37,28 +68,36 @@ class AugmentedRealityProcessor:
         if not self.calibration.ins.any() or not self.calibration.dist.any():
             print("Camera not calibrated. Run calibration first.")
             return
-
-        for char in word:
-            char_points = self.read_character_points(char, orientation)
-            if char_points is None or char_points.size == 0:
-                print(f"No valid points found for character: {char}")
+        
+        # Process each character in the word and combine the projections onto the same image
+        for i, (rvec, tvec) in enumerate(zip(self.calibration.rvecs, self.calibration.tvecs)):
+            img = cv2.imread(select_images[i])
+            if img is None:
+                print(f"Could not read image {select_images[i]}")
                 continue
-            
-            char_points = np.array(char_points, dtype=np.float32).reshape(-1, 3)
-            char_points = char_points[:, np.newaxis, :]
-            print(f"Character {char} points: {char_points}")
-            print(f"ins: {self.calibration.ins}, dist: {self.calibration.dist}")
-            
-            for i, (rvec, tvec) in enumerate(zip(self.calibration.rvecs, self.calibration.tvecs)):
-                img = cv2.imread(select_images[i])
-                if img is None:
-                    print(f"Could not read image {select_images[i]}")
+
+            for index, char in enumerate(word):
+                char_points = self.read_character_points(char, orientation)
+                if char_points is None or char_points.size == 0:
+                    print(f"No valid points found for character: {char}")
                     continue
-                print(f"rvec: {rvec}, tvec: {tvec}")
 
+                # Rotate character points by 90 degrees
+                rotated_char_points = self.rotate_points(char_points, 90, axis='z')
+
+                # Apply translation to place characters in separate positions on the board
+                x = 0.04 + (0.06 if index > 2 else 0.00)
+                y = 0.14 - 0.06 * (index % 3) 
+                translation_vector = np.array([x, y, 0])  # Offset each character
+                translated_points = rotated_char_points + translation_vector
+
+                char_points = np.array(translated_points, dtype=np.float32).reshape(-1, 3)
+                char_points = char_points[:, np.newaxis, :]
+
+                # Project the points onto the image
                 projected_points, _ = cv2.projectPoints(char_points, rvec, tvec, self.calibration.ins, self.calibration.dist)
-                print(f"Projected points for character {char}: {projected_points}")
-
+                
+                # Draw the character lines on the image
                 for j in range(0, len(projected_points) - 1, 2):  # Step by 2 for each line segment
                     pointA = tuple(map(int, projected_points[j].ravel()))
                     pointB = tuple(map(int, projected_points[j + 1].ravel()))
@@ -66,17 +105,16 @@ class AugmentedRealityProcessor:
                     # Ensure points are within image bounds
                     if (0 <= pointA[0] < img.shape[1] and 0 <= pointA[1] < img.shape[0] and
                         0 <= pointB[0] < img.shape[1] and 0 <= pointB[1] < img.shape[0]):
-                        print(f"Drawing line from {pointA} to {pointB}")
                         cv2.line(img, pointA, pointB, (0, 255, 0), 2)
                     else:
                         print(f"Skipping line from {pointA} to {pointB}, points out of image bounds.")
 
-                resized_img = cv2.resize(img, (800, 600))
-                cv2.imshow(f'Projected {char} on Image {i+1}', resized_img)
-                cv2.waitKey(1000)
-                cv2.destroyWindow(f'Projected {char} on Image {i+1}')
+            resized_img = cv2.resize(img, (800, 600))
+            cv2.imwrite(f'projected_word_{i+1}.png', resized_img)
+            cv2.imshow(f'Projected Word on Image {i+1}', resized_img)
+            cv2.waitKey(1000)
+            cv2.destroyWindow(f'Projected Word on Image {i+1}')
 
-# Assuming this function gets called from somewhere with the appropriate images and word
 # Example usage:
 # processor = AugmentedRealityProcessor()
 # images = ['1.bmp', '2.bmp', '3.bmp', '4.bmp', '5.bmp']  # Replace with actual paths
