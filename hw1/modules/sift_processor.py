@@ -6,6 +6,12 @@ class SIFTProcessor:
         self.image2 = None
 
     def load_image1(self, filepath):
+        """
+        Load the first image from the provided file path.
+
+        Args:
+            filepath (str): Path to the image file.
+        """
         self.image1 = cv2.imread(filepath)
         if self.image1 is None:
             print("Failed to load Image 1.")
@@ -13,6 +19,12 @@ class SIFTProcessor:
             print(f"Loaded Image 1: {filepath}")
 
     def load_image2(self, filepath):
+        """
+        Load the second image from the provided file path.
+
+        Args:
+            filepath (str): Path to the image file.
+        """
         self.image2 = cv2.imread(filepath)
         if self.image2 is None:
             print("Failed to load Image 2.")
@@ -20,6 +32,11 @@ class SIFTProcessor:
             print(f"Loaded Image 2: {filepath}")
 
     def show_keypoints(self):
+        """
+        Show the keypoints detected in the first image.
+        
+        Note: This method uses the SIFT algorithm to detect keypoints.
+        """
         if self.image1 is None:
             print("Image 1 not loaded.")
             return
@@ -34,6 +51,11 @@ class SIFTProcessor:
         cv2.destroyAllWindows()
 
     def show_matched_keypoints(self):
+        """
+        Show the matched keypoints between the two loaded images.
+
+        Note: This method uses the SIFT algorithm to detect and match keypoints.
+        """
         if self.image1 is None or self.image2 is None:
             print("Both images need to be loaded.")
             return
@@ -58,3 +80,10 @@ class SIFTProcessor:
         cv2.imshow("Matched Keypoints", matched_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+
+# Example usage:
+# processor = SIFTProcessor()
+# processor.load_image1('path/to/image1.png')
+# processor.load_image2('path/to/image2.png')
+# processor.show_keypoints()
+# processor.show_matched_keypoints()
