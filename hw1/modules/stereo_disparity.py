@@ -46,7 +46,6 @@ class StereoDisparityProcessor:
         disparity_normalized = np.uint8(disparity_normalized)
 
         # Show the disparity map
-        cv2.imwrite('disparity_map.png', disparity_normalized)
         cv2.imshow('Disparity Map', disparity_normalized)
         cv2.waitKey(0)
         cv2.destroyAllWindows()

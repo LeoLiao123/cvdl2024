@@ -52,7 +52,9 @@ class Calibration:
                 if display:
                     # Draw corners on the image
                     cv2.drawChessboardCorners(image, self.chessboard_size, corners, ret)
-                    cv2.imshow(f"Corners in {os.path.basename(img_path)}", image)
+                    # Resize image for display
+                    display_image = cv2.resize(image, (800, 600))
+                    cv2.imshow(f"Corners in {os.path.basename(img_path)}", display_image)
                     cv2.waitKey(5000)  
 
             else:
@@ -126,11 +128,14 @@ class Calibration:
 
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             undistorted_image = cv2.undistort(gray_image, self.ins, self.dist)
-            # Save two images side by side
-            cv2.imwrite(f"distorted{os.path.basename(image_path)}", gray_image)
-            cv2.imwrite(f"undistorted{os.path.basename(image_path)}", undistorted_image)
-            cv2.imshow("Distorted image", gray_image)
-            cv2.imshow("Undistorted image", undistorted_image)
+            
+            # Resize images for display
+            display_gray = cv2.resize(gray_image, (800, 600))
+            display_undistorted = cv2.resize(undistorted_image, (800, 600))
+            
+            # Display resized images
+            cv2.imshow("Distorted image", display_gray)
+            cv2.imshow("Undistorted image", display_undistorted)
             cv2.waitKey(5000)
 
         cv2.destroyAllWindows()

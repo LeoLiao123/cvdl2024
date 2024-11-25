@@ -105,12 +105,11 @@ class AugmentedRealityProcessor:
                     # Ensure points are within image bounds
                     if (0 <= pointA[0] < img.shape[1] and 0 <= pointA[1] < img.shape[0] and
                         0 <= pointB[0] < img.shape[1] and 0 <= pointB[1] < img.shape[0]):
-                        cv2.line(img, pointA, pointB, (0, 255, 0), 2)
+                        cv2.line(img, pointA, pointB, (0, 255, 0), 12)
                     else:
                         print(f"Skipping line from {pointA} to {pointB}, points out of image bounds.")
 
             resized_img = cv2.resize(img, (800, 600))
-            cv2.imwrite(f'projected_word_{i+1}.png', resized_img)
             cv2.imshow(f'Projected Word on Image {i+1}', resized_img)
             cv2.waitKey(1000)
             cv2.destroyWindow(f'Projected Word on Image {i+1}')
