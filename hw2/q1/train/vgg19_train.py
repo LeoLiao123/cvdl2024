@@ -54,7 +54,7 @@ def plot_training_history(train_losses, val_losses, train_accs, val_accs, curren
     plt.grid(True)
     
     plt.tight_layout()
-    plt.savefig('training_history_128_Normalize.png')
+    plt.savefig('training_history_64_Normalize.png')
     plt.close()
 
 def train_epoch(model, train_loader, criterion, optimizer):
@@ -113,12 +113,12 @@ def main():
         transforms.RandomVerticalFlip(),
         transforms.RandomRotation(30),
         transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
     test_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
     # Load datasets
@@ -147,9 +147,9 @@ def main():
     logger.info(f'Test set size: {len(test_dataset)}\n')
 
     # Create data loaders
-    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_dataset, batch_size=128, shuffle=False, num_workers=0)
-    test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False, num_workers=0)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=0)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False, num_workers=0)
 
     # Load pre-trained VGG19_BN model and modify the last layer
     logger.info('Initializing VGG19_BN model...')
@@ -157,9 +157,10 @@ def main():
     model = model.to(device)
 
     # Define loss function and optimizer
+    lr_value = 0.001
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    logger.info('Using Adam optimizer with learning rate: 0.001\n')
+    optimizer = optim.SGD(model.parameters(), lr=lr_value, momentum=0.9)
+    logger.info(f'Using Adam optimizer with learning rate: {lr_value}\n')
 
     # Lists to store training history
     train_losses = []
@@ -188,7 +189,7 @@ def main():
         # Save best model
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), 'best_model_128_normalize.pth')
+            torch.save(model.state_dict(), 'best_model_64_normalize.pth')
             logger.info(f'New best validation accuracy: {val_acc:.2f}%')
         
         # Log progress
@@ -199,7 +200,7 @@ def main():
 
     # Load the best model and evaluate on test set
     logger.info('\nTraining completed. Loading best model for final evaluation...')
-    model.load_state_dict(torch.load('best_model.pth'))
+    model.load_state_dict(torch.load('best_model_64_normalize.pth'))
     test_loss, test_acc = validate(model, test_loader, criterion)
     logger.info(f'Final Test Accuracy: {test_acc:.2f}%')
 
