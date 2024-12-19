@@ -47,38 +47,3 @@ class AugmentationWindow(QWidget):
         pixmap = QPixmap()
         pixmap.loadFromData(bytes_img)
         return pixmap
-
-# modules/windows/history_window.py
-class HistoryWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Training History")
-        self.init_ui()
-        
-    def init_ui(self):
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        
-        if not os.path.exists('training_history_128_Normalize.png'):
-            QMessageBox.warning(self, "Warning", "Training history plot not found!")
-            return
-            
-        pixmap = QPixmap('training_history_128_Normalize.png')
-        label = QLabel()
-        label.setPixmap(pixmap.scaled(800, 400, Qt.KeepAspectRatio))
-        layout.addWidget(label)
-
-# modules/windows/probability_window.py
-class ProbabilityWindow(QWidget):
-    def __init__(self, probabilities, classes):
-        super().__init__()
-        self.setWindowTitle("Prediction Probabilities")
-        self.init_ui(probabilities, classes)
-        
-    def init_ui(self, probabilities, classes):
-        layout = QVBoxLayout()
-        self.setLayout(layout)
-        
-        figure = Visualizer.create_probability_plot(probabilities, classes)
-        canvas = FigureCanvas(figure)
-        layout.addWidget(canvas)

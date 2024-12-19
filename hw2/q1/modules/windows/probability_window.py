@@ -12,7 +12,7 @@ class ProbabilityWindow(QWidget):
         self.setWindowTitle("Prediction Probabilities")
         self.probabilities = probabilities
         self.classes = classes
-        # 添加全局樣式
+        # Set white background with black text
         self.setStyleSheet("""
             QWidget {
                 background-color: white;
@@ -61,7 +61,7 @@ class ProbabilityWindow(QWidget):
         for i, (class_name, prob) in enumerate(zip(self.classes, self.probabilities)):
             class_item = QTableWidgetItem(class_name)
             prob_item = QTableWidgetItem(f"{prob:.4%}")
-            # 確保文字顏色為黑色
+            # Set text color to black
             class_item.setForeground(QBrush(QColor('black')))
             prob_item.setForeground(QBrush(QColor('black')))
             table.setItem(i, 0, class_item)
@@ -98,7 +98,7 @@ class ProbabilityWindow(QWidget):
         plt.style.use('classic')
         fig, ax = plt.subplots(figsize=(10, 6))
         
-        # 設置圖表背景為白色，文字為黑色
+        # Set background color to white
         fig.patch.set_facecolor('white')
         ax.set_facecolor('white')
         
