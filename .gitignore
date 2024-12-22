@@ -1,6 +1,9 @@
 __pycache__/
 env/
+data/
+*.pyc
 *.bmp
 *.png
 *.pth
 *.jpg
+*.log
