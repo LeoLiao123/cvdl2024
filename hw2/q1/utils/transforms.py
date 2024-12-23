@@ -5,12 +5,8 @@ class ImageTransforms:
     @staticmethod
     def get_inference_transforms():
         return transforms.Compose([
-            transforms.Resize((32, 32)),
             transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.4914, 0.4822, 0.4465],
-                std=[0.2023, 0.1994, 0.2010]
-            )
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
         ])
 
     @staticmethod

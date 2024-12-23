@@ -82,7 +82,7 @@ def create_model():
 model = create_model().to(device)
 
 # Training hyperparameters
-num_epochs = 100  # Reduced epochs for AdamW as it typically converges faster
+num_epochs = 150  
 
 # Loss and optimizer setup
 loss_fn = nn.CrossEntropyLoss()
@@ -125,10 +125,10 @@ def train_one_epoch(model, train_loader, loss_fn, optimizer, scaler, scheduler, 
         
         # Backward and optimize
         scaler.scale(loss).backward()
-        # First update the optimizer
         scaler.step(optimizer)
         scaler.update()
-        # Then update the learning rate
+        
+        # Step the scheduler
         scheduler.step()
         
         running_loss += loss.item()
@@ -222,7 +222,7 @@ for epoch in range(num_epochs):
     epoch_start_time = time.time()
     train_loss, train_acc = train_one_epoch(model, train_loader, loss_fn, optimizer, scaler, scheduler, epoch)
     val_acc, val_loss = evaluate(model, val_loader, loss_fn)
-    scheduler.step()
+    
     
     # Update history
     history['train_loss'].append(train_loss)
@@ -245,7 +245,7 @@ for epoch in range(num_epochs):
             'acc': val_acc,
             'epoch': epoch,
         }
-        model_path = os.path.join('logs', 'best_model.pth')
+        model_path = os.path.join('logs', 'best_model_adam.pth')
         torch.save(state, model_path)
         best_acc = val_acc
     

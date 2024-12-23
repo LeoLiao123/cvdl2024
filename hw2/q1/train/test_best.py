@@ -91,7 +91,7 @@ def main():
     model = create_model().to(device)
     
     # Load the saved best model
-    checkpoint = torch.load('logs/best_model.pth', weights_only=True)  # Use weights_only=True for security
+    checkpoint = torch.load('logs/best_model_adam.pth', weights_only=True)  # Use weights_only=True for security
     model.load_state_dict(checkpoint['model'])  
     print(f"Loaded model from epoch {checkpoint['epoch']} with validation accuracy: {checkpoint['acc']:.2f}%")
     
