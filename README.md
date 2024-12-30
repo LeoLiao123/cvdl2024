@@ -11,4 +11,8 @@ Description: Implement a simple image processing program to perform the followin
 4. Extract SIFT features from images and match them
 
 ## Homework 2
-Not yet released.
+Description: Implement a deep learning program to perform the following operations:
+1. Train a VGG19 model on the CIFAR-10 dataset using SGD and Adam optimizers.
+2. Optimize hyperparameters using Optuna.
+3. Evaluate the trained model on the test set.
+4. Implement a DCGAN to generate MNIST-like images.
